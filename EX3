@@ -1,0 +1,48 @@
+import numpy as np
+from keras.models import Sequential
+from keras.layers import Dense, Input
+from keras.utils import to_categorical
+from keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+def create_ann(input_dim, hidden_layers, output_dim):
+    model = Sequential()
+    model.add(Input(shape=(input_dim,)))  # Add an Input layer with shape
+    model.add(Dense(64, activation='relu'))
+    for i in range(hidden_layers):
+        model.add(Dense(64, activation='relu'))
+    model.add(Dense(output_dim, activation='softmax'))
+    model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
+    return model
+
+from keras.datasets import mnist
+
+# Load MNIST dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+# Preprocess data
+X_train = X_train.reshape(60000, 784)
+X_test = X_test.reshape(10000, 784)
+X_train = X_train.astype('float32')
+X_test = X_test.astype('float32')
+X_train /= 255
+X_test /= 255
+
+# Convert class vectors to binary class matrices
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+# Split data into training and validation sets
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
+
+# Create and train the ANN
+ann = create_ann(784, 4, 10)
+ann.fit(X_train, y_train, epochs=10, batch_size=128, validation_data=(X_val, y_val))
+
+# Evaluate the ANN
+y_pred = ann.predict(X_test)
+y_pred_class = np.argmax(y_pred, axis=1)
+y_test_class = np.argmax(y_test, axis=1)
+accuracy = accuracy_score(y_test_class, y_pred_class)
+print(f'Test accuracy: {accuracy:.2f}')
