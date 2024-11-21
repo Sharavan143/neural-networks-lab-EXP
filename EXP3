@@ -1,4 +1,9 @@
+pip install --upgrade numpy pandas tensorflow
+pip show numpy pandas tensorflow
+!pip install scipy
 import numpy as np
+pip install keras
+
 from keras.models import Sequential
 from keras.layers import Dense, Input
 from keras.utils import to_categorical
